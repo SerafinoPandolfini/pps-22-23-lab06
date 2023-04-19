@@ -1,4 +1,4 @@
-package u06lab.code
+package u06lab.solution
 
 import org.junit.Test
 import org.junit.Assert.*
