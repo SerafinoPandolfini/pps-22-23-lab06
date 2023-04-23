@@ -54,7 +54,45 @@ object ConnectThree extends App:
         game <- computeAnyGame(player.other, moves - 1)
         move <- placeAnyDisk(game.head, player)
       yield
-        LazyList(move).appendedAll(game)
+        Seq(move).appendedAll(game)
+
+  def computeAnyGame2(player: Player, moves: Int): LazyList[Game] =
+    def _computeAnyGame2(player: Player, moves: Int): LazyList[(Game, Boolean)] = moves match
+      case 0 => LazyList((Seq(List()), false))
+      case _ =>
+        for
+          game <- _computeAnyGame2(player.other, moves - 1)
+          move <- if game._2 then Seq(List()) else placeAnyDisk(game._1.head, player)
+        yield
+          if game._2
+          then
+            game
+          else
+            (Seq(move).appendedAll(game._1), isGameWon(game._1.head, move))
+    _computeAnyGame2(player, moves).map(_._1)
+
+  def isGameWon(last: Board, move: Board): Boolean =
+    val MIN_SIZE = 5
+    if move.size < MIN_SIZE then return false
+    val lastMove = move.findLast(!last.contains(_)).get
+    val x = lastMove.x
+    val y = lastMove.y
+    val player = lastMove.player
+    // vertical
+    (last.contains(Disk(x, y - 1, player)) && last.contains(Disk(x, y - 2, player))) ||
+    //horizontal
+      (last.contains(Disk(x - 1, y, player)) && last.contains(Disk(x - 2, y, player))) ||
+      (last.contains(Disk(x - 1, y, player)) && last.contains(Disk(x + 1, y, player))) ||
+      (last.contains(Disk(x + 1, y, player)) && last.contains(Disk(x + 2, y, player))) ||
+    //lateral ascending
+      (last.contains(Disk(x - 2, y - 2, player)) && last.contains(Disk(x - 1, y - 1, player))) ||
+      (last.contains(Disk(x - 1, y - 1, player)) && last.contains(Disk(x + 1, y + 1, player))) ||
+      (last.contains(Disk(x + 1, y + 1, player)) && last.contains(Disk(x + 2, y + 2, player))) ||
+    // lateral descending
+      (last.contains(Disk(x + 2, y - 2, player)) && last.contains(Disk(x + 1, y - 1, player))) ||
+      (last.contains(Disk(x + 1, y - 1, player)) && last.contains(Disk(x - 1, y + 1, player))) ||
+      (last.contains(Disk(x - 1, y + 1, player)) && last.contains(Disk(x - 2, y + 2, player)))
+
 
   def printBoards(game: Seq[Board]): Unit =
     for
@@ -96,7 +134,7 @@ object ConnectThree extends App:
   // ...O ..XO .X.O X..O
   println("EX 3: ")
 // Exercise 3 (ADVANCED!): implement computeAnyGame such that..
-  computeAnyGame(O, 5).foreach { g =>
+  computeAnyGame(O, 4).foreach { g =>
     printBoards(g)
     println()
   }
@@ -111,4 +149,14 @@ object ConnectThree extends App:
 // .... .... O... O... O...
 // .... X... X... X... X...
 
+  println("EX 4: ")
 // Exercise 4 (VERY ADVANCED!) -- modify the above one so as to stop each game when someone won!!
+  var win = 0
+  var total = 0
+  computeAnyGame2(O, 6).foreach { g =>
+    total = total + 1
+    if isGameWon(g.tail.head, g.head) then
+      printBoards(g)
+      win = win + 1
+  }
+  println(total + " " + win)
