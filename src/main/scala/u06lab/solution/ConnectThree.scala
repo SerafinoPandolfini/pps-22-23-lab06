@@ -48,7 +48,6 @@ object ConnectThree extends App:
 
   def computeAnyGame(player: Player, moves: Int): LazyList[Game] = moves match
     case 0 => LazyList(Seq(List()))
-    //case 1 => placeAnyDisk(List(), player).map(Seq(_)).to(LazyList)
     case _ =>
       for
         game <- computeAnyGame(player.other, moves - 1)
@@ -62,19 +61,17 @@ object ConnectThree extends App:
       case _ =>
         for
           game <- _computeAnyGame2(player.other, moves - 1)
-          move <- if game._2 then Seq(List()) else placeAnyDisk(game._1.head, player)
+          board <- if game._2 then Seq(List()) else placeAnyDisk(game._1.head, player)
         yield
           if game._2
-          then
-            game
-          else
-            (Seq(move).appendedAll(game._1), isGameWon(game._1.head, move))
+          then game
+          else (Seq(board).appendedAll(game._1), isGameWon(game._1.head, board))
     _computeAnyGame2(player, moves).map(_._1)
 
-  def isGameWon(last: Board, move: Board): Boolean =
+  def isGameWon(last: Board, board: Board): Boolean =
     val MIN_SIZE = 5
-    if move.size < MIN_SIZE then return false
-    val lastMove = move.findLast(!last.contains(_)).get
+    if board.size < MIN_SIZE then return false
+    val lastMove = board.findLast(!last.contains(_)).get
     val x = lastMove.x
     val y = lastMove.y
     val player = lastMove.player
@@ -153,10 +150,11 @@ object ConnectThree extends App:
 // Exercise 4 (VERY ADVANCED!) -- modify the above one so as to stop each game when someone won!!
   var win = 0
   var total = 0
-  computeAnyGame2(O, 6).foreach { g =>
+  computeAnyGame2(O, 7).foreach { g =>
     total = total + 1
-    if isGameWon(g.tail.head, g.head) then
+    if isGameWon(g.tail.head, g.head) then //show only winning games
       printBoards(g)
+      println()
       win = win + 1
   }
-  println(total + " " + win)
+  println("total games: "+total + "\nwinning games: " + win)
