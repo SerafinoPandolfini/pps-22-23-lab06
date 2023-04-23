@@ -32,12 +32,18 @@ object ConnectThree extends App:
 
   def firstAvailableRow(board: Board, x: Int): Option[Int] =
     if x < 0 || x > bound then return None
-    if board.isEmpty then return Option(0)
-    val maxy = board.filter(_.x == x)
-      .reduce((d1 ,d2) => if d1.y > d2.y then d1 else d2).y
+    val filteredBoard = board.filter(_.x == x)
+    if filteredBoard.isEmpty then return Option(0)
+    val maxy = filteredBoard.reduce((d1 ,d2) => if d1.y > d2.y then d1 else d2).y
     if maxy == bound then None else Option(maxy + 1)
 
-  def placeAnyDisk(board: Board, player: Player): Seq[Board] = ???
+  def placeAnyDisk(board: Board, player: Player): Seq[Board] =
+    for
+      x <- 0 to bound
+      y = firstAvailableRow(board, x)
+      if y.isDefined
+    yield
+      Seq(Disk(x, y.get , player)).appendedAll(board)
 
   def computeAnyGame(player: Player, moves: Int): LazyList[Game] = ???
 
@@ -67,11 +73,13 @@ object ConnectThree extends App:
   println(firstAvailableRow(List(Disk(0, 0, X), Disk(0, 1, X), Disk(0, 2, X), Disk(0, 3, X)), 0)) // None
 
   // Exercise 2: implement placeAnyDisk such that..
+  println(placeAnyDisk(List(), X))
   printBoards(placeAnyDisk(List(), X))
   // .... .... .... ....
   // .... .... .... ....
   // .... .... .... ....
   // ...X ..X. .X.. X...
+  println(placeAnyDisk(List(Disk(0, 0, O)), X))
   printBoards(placeAnyDisk(List(Disk(0, 0, O)), X))
   // .... .... .... ....
   // .... .... .... ....
