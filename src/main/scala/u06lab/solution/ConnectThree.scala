@@ -27,9 +27,15 @@ object ConnectThree extends App:
 
   import Player.*
 
-  def find(board: Board, x: Int, y: Int): Option[Player] = ???
+  def find(board: Board, x: Int, y: Int): Option[Player] =
+    board.findLast(d => d.x == x && d.y == y).map(_.player)
 
-  def firstAvailableRow(board: Board, x: Int): Option[Int] = ???
+  def firstAvailableRow(board: Board, x: Int): Option[Int] =
+    if x < 0 || x > bound then return None
+    if board.isEmpty then return Option(0)
+    val maxy = board.filter(_.x == x)
+      .reduce((d1 ,d2) => if d1.y > d2.y then d1 else d2).y
+    if maxy == bound then None else Option(maxy + 1)
 
   def placeAnyDisk(board: Board, player: Player): Seq[Board] = ???
 
@@ -59,6 +65,7 @@ object ConnectThree extends App:
   println(firstAvailableRow(List(Disk(0, 0, X), Disk(0, 1, X)), 0)) // Some(2)
   println(firstAvailableRow(List(Disk(0, 0, X), Disk(0, 1, X), Disk(0, 2, X)), 0)) // Some(3)
   println(firstAvailableRow(List(Disk(0, 0, X), Disk(0, 1, X), Disk(0, 2, X), Disk(0, 3, X)), 0)) // None
+
   // Exercise 2: implement placeAnyDisk such that..
   printBoards(placeAnyDisk(List(), X))
   // .... .... .... ....
