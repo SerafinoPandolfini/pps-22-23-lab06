@@ -1,5 +1,6 @@
 package u06lab.solution
 
+import java.util
 import java.util.OptionalInt
 
 // Optional!
@@ -34,8 +35,8 @@ object ConnectThree extends App:
     if x < 0 || x > bound then return None
     val filteredBoard = board.filter(_.x == x)
     if filteredBoard.isEmpty then return Option(0)
-    val maxy = filteredBoard.reduce((d1 ,d2) => if d1.y > d2.y then d1 else d2).y
-    if maxy == bound then None else Option(maxy + 1)
+    val maxY = filteredBoard.reduce((d1 ,d2) => if d1.y > d2.y then d1 else d2).y
+    if maxY == bound then None else Option(maxY + 1)
 
   def placeAnyDisk(board: Board, player: Player): Seq[Board] =
     for
@@ -45,7 +46,15 @@ object ConnectThree extends App:
     yield
       Seq(Disk(x, y.get , player)).appendedAll(board)
 
-  def computeAnyGame(player: Player, moves: Int): LazyList[Game] = ???
+  def computeAnyGame(player: Player, moves: Int): LazyList[Game] = moves match
+    case 0 => LazyList(Seq(List()))
+    //case 1 => placeAnyDisk(List(), player).map(Seq(_)).to(LazyList)
+    case _ =>
+      for
+        game <- computeAnyGame(player.other, moves - 1)
+        move <- placeAnyDisk(game.head, player)
+      yield
+        LazyList(move).appendedAll(game)
 
   def printBoards(game: Seq[Board]): Unit =
     for
@@ -87,7 +96,7 @@ object ConnectThree extends App:
   // ...O ..XO .X.O X..O
   println("EX 3: ")
 // Exercise 3 (ADVANCED!): implement computeAnyGame such that..
-  computeAnyGame(O, 4).foreach { g =>
+  computeAnyGame(O, 5).foreach { g =>
     printBoards(g)
     println()
   }
