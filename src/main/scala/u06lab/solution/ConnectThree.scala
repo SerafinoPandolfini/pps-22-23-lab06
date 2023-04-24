@@ -33,10 +33,14 @@ object ConnectThree extends App:
 
   def firstAvailableRow(board: Board, x: Int): Option[Int] =
     if x < 0 || x > bound then return None
-    val filteredBoard = board.filter(_.x == x)
-    if filteredBoard.isEmpty then return Option(0)
-    val maxY = filteredBoard.reduce((d1 ,d2) => if d1.y > d2.y then d1 else d2).y
-    if maxY == bound then None else Option(maxY + 1)
+    val availableY = for
+      y <- 0 to bound
+      if find(board, x, y).isEmpty
+    yield
+      y
+    if availableY.isEmpty
+    then None
+    else Some(availableY.min)
 
   def placeAnyDisk(board: Board, player: Player): Seq[Board] =
     for
@@ -46,27 +50,20 @@ object ConnectThree extends App:
     yield
       Seq(Disk(x, y.get , player)).appendedAll(board)
 
-  def computeAnyGame(player: Player, moves: Int): LazyList[Game] = moves match
-    case 0 => LazyList(Seq(List()))
-    case _ =>
-      for
-        game <- computeAnyGame(player.other, moves - 1)
-        move <- placeAnyDisk(game.head, player)
-      yield
-        Seq(move).appendedAll(game)
 
-  def computeAnyGame2(player: Player, moves: Int): LazyList[Game] =
-    def _computeAnyGame2(player: Player, moves: Int): LazyList[(Game, Boolean)] = moves match
+
+  def computeAnyGame(player: Player, moves: Int): LazyList[Game] =
+    def _computeAnyGame(player: Player, moves: Int): LazyList[(Game, Boolean)] = moves match
       case 0 => LazyList((Seq(List()), false))
       case _ =>
         for
-          game <- _computeAnyGame2(player.other, moves - 1)
+          game <- _computeAnyGame(player.other, moves - 1)
           board <- if game._2 then Seq(List()) else placeAnyDisk(game._1.head, player)
         yield
           if game._2
           then game
           else (Seq(board).appendedAll(game._1), isGameWon(game._1.head, board))
-    _computeAnyGame2(player, moves).map(_._1)
+    _computeAnyGame(player, moves).map(_._1)
 
   def isGameWon(last: Board, board: Board): Boolean =
     val MIN_SIZE = 5
@@ -150,9 +147,9 @@ object ConnectThree extends App:
 // Exercise 4 (VERY ADVANCED!) -- modify the above one so as to stop each game when someone won!!
   var win = 0
   var total = 0
-  computeAnyGame2(O, 7).foreach { g =>
+  computeAnyGame(O, 7).foreach { g =>
     total = total + 1
-    if isGameWon(g.tail.head, g.head) then //show only winning games
+    if isGameWon(g.tail.head, g.head) then //show only winning games, easier to see the difference in length
       printBoards(g)
       println()
       win = win + 1
