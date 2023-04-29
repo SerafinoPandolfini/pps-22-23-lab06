@@ -5,7 +5,7 @@ import org.junit.Assert.*
 import u06lab.solution.*
 import u06lab.solution.Parsers.charParser
 
-class ParserTests:
+class ParserTest:
   def parser = new BasicParser(Set('a', 'b', 'c'))
   // Note NonEmpty being "stacked" on to a concrete class
   // Bottom-up decorations: NonEmptyParser -> NonEmpty -> BasicParser -> Parser
@@ -14,6 +14,7 @@ class ParserTests:
   // note we do not need a class name here, we use the structural type
   def parserNTCNE = new BasicParser(Set('X', 'Y', 'Z')) with NotTwoConsecutive[Char] with NonEmpty[Char]
   def sparser: Parser[Char] = "abc".charParser
+  def parserSTN = new ShortenThenNParser(Set('X', 'Y', 'Z'), 3)
 
   @Test
   def testBasicParser =
@@ -44,3 +45,9 @@ class ParserTests:
     assertTrue(sparser.parseAll("aabc".toList))
     assertFalse(sparser.parseAll("aabcdc".toList))
     assertTrue(sparser.parseAll("".toList))
+
+  @Test
+  def testShortenThenNParser =
+    assertTrue(parserSTN.parseAll("XY".toList))
+    assertTrue(parserSTN.parseAll("XYZ".toList))
+    assertFalse(parserSTN.parseAll("XYZX".toList))
