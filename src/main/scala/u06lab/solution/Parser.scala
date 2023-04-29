@@ -30,7 +30,7 @@ class NonEmptyParser(chars: Set[Char]) extends BasicParser(chars) with NonEmpty[
 
 trait NotTwoConsecutive[T] extends Parser[T]:
   private[this] var last:Option[T] = Option.empty
-  private[this] var equalToLast = false;
+  private[this] var equalToLast = false
   abstract override def parse(t: T): Boolean =
     if last.isDefined && last.get == t then equalToLast = true
     last = Option.apply(t)
