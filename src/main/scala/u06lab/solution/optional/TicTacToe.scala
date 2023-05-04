@@ -1,6 +1,6 @@
-package u06lab.solution
+package u06lab.solution.optional
 
-import u06lab.solution.TicTacToe.Player.*
+import u06lab.solution.optional.TicTacToe.Player.*
 
 object TicTacToe extends App :
   val bound = 2

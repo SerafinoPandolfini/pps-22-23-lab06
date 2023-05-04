@@ -1,4 +1,4 @@
-package u06lab.solution
+package u06lab.solution.optional
 
 import java.util
 import java.util.OptionalInt
